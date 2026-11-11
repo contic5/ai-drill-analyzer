@@ -1,1 +1,2 @@
 https://developers.openai.com/api/docs/guides/text
+https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses
