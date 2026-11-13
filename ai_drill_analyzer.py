@@ -8,11 +8,15 @@ from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+
+force_overwrite=True
+
 def prepare_prompt(row:pd.Series):
     drill=row["Name"]
     category=row["Category"]
     ranks=row["Ranks"]
     steps=row["Steps"]
+    instructor_focus=row["Instructor_Focus"]
 
     prompt=f'''
     Analyze the following drill. 
@@ -22,6 +26,7 @@ def prepare_prompt(row:pd.Series):
     Curricumum: {category}
     Target Ranks: {ranks}
     Steps: {steps}
+    Instructor Focus: {instructor_focus}
     '''
 
     prompt=textwrap.dedent(prompt)
@@ -29,7 +34,8 @@ def prepare_prompt(row:pd.Series):
 
 def save_data(analysis_list:list):
     analysis_df=pd.DataFrame.from_dict(analysis_list)
-    print(analysis_df.head())
+    print("SAVING DATA")
+    print(f"Drills Analyzed: {len(analysis_list)}")
 
     analysis_df.to_excel("results/Analyzed Drills.xlsx",sheet_name="Results")
 
@@ -70,18 +76,28 @@ def main():
     previous_analysis_steps_list=previous_analysis_df["Steps"].to_list()
 
     for index,row in drill_df.iterrows():
-        if "SELF" in str(row["Category"]).upper() or "DEFENSE" in str(row["Category"]).upper():
-                continue
+        #Have the AI not interact with any drills that sound violent.
+        if row["Sounds_Violent"]==True:
+            analysis_list.append(row.to_dict())
+            continue
         
-        previous_match_index=previous_analysis_steps_list.index(row["Steps"])
-        #Generate new results if drill is new
-        if row["Steps"]==-1:
-            analysis_list.append(generate_response(row))
+        
+        #Generate new results if we want to forcibly rewrite all data
+        if force_overwrite:
+            new_response=generate_response(row)
+            analysis_list.append(new_response)
+            continue
+
         #Fetch matching row if there is a match
-        else:
+        try:
+            previous_match_index=previous_analysis_steps_list.index(row["Steps"])
             print("Using previously calculated results")
             analysis_list.append(previous_analysis_df.iloc[previous_match_index].to_dict())
-        break
+        #Otherwise, generate new response.
+        except ValueError:
+            new_response=generate_response(row)
+            analysis_list.append(new_response)
+            
 
         #Save after every few rows to prevent data loss
         if(index%3==0):

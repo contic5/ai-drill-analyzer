@@ -1,10 +1,1 @@
-Use Python and ChatGPT API to score Taekwondo drills on
-1. Physical Development
-2. Skill Development
-3. Fun
-
-Use Retrieval Augmented Generation (RAG) to access rank standards and goals. This will make drill scoring more accurate.
-
-Make sure to tell AI that all students are safe and that drills are with instructors. All practice weapons are fake toys to ensure student safety. All practice is safe.
-
-HAVE THE AI NOT REVIEW SELF DEFENSE DRILLS. I feel uncomfortable sending self defense drills to ChatGPT.
+Make a React App that displays the results.
